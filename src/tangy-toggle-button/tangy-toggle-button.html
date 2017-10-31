@@ -1,0 +1,85 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<dom-module id="tangy-toggle-button">
+  <template>
+    <style>
+      :host {
+        display: inline-block;
+        border: solid 3px #777;
+        border-radius: 15px;
+        padding: 15px;
+        color: #777;
+        font-size: 1em;
+
+      }
+      :host([hidden]) {
+        display: none;
+      }
+      :host([pressed]) {
+        background: #777;
+        color: #FFF;
+      }
+    </style>
+    <div class="container">
+        <slot></slot>
+    </div>
+  </template>
+
+  <script>
+    /**
+     * `tangy-toggle-button`
+     * 
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class TangyToggleButton extends Polymer.Element {
+      static get is() { return 'tangy-toggle-button'; }
+      static get properties() {
+        return {
+          name: {
+            type: String,
+            value: '',
+            reflectToAttribute: true
+          },
+          value: {
+            type: String,
+            value: '',
+            reflectToAttribute: true,
+            observer: 'onValueChange'
+          },
+          pressed: {
+            type: Boolean,
+            value: false,
+            reflectToAttribute: true
+          }
+        };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this.addEventListener('click', this.toggle.bind(this))
+      }
+
+      toggle() {
+        if (this.value == '') {
+          this.value = 'on'
+        } else {
+          this.value = ''
+        }
+      }
+
+      onValueChange(newState, oldState) {
+        if (newState == '') {
+          this.pressed = false
+        } else {
+          this.pressed = true
+        }
+      }
+    
+    }
+
+    window.customElements.define(TangyToggleButton.is, TangyToggleButton);
+  </script>
+</dom-module>

@@ -1,0 +1,197 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../src/tangy-toggle-button/tangy-toggle-button.html">
+
+<dom-module id="tangy-timed">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      tangy-toggle-button { 
+        display: inline-block;
+        margin:10px 0 0 2%;
+        flex-grow: 1;
+        height:100px;
+        width: calc(100% * (1/8) - 10px - 1px);
+      }
+            
+      #grid {
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+    </style>
+    <span class="countdown">[[timeRemaining]]⏱</span>
+    <span> [[statusMessage]] </span>
+    <div>
+      <button on-click="clickedStart">start timer</button>
+      <button on-click="clickedStop">stop timer</button>
+      <button on-click="clickedReset">reset timer</button>
+    </div>
+    <div id="grid">
+    </div>
+    <slot></slot>
+  </template>
+
+  <script>
+    /**
+     * `tangy-timed`
+     * 
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class TangyTimed extends Polymer.Element {
+      static get is() { return 'tangy-timed'; }
+      static get properties() {
+        return {
+          duration: {
+            type: Number,
+            value: 60 
+          },
+          timeRemaining: {
+            type: Number,
+            value: 0 
+          },
+          timeSpent: {
+            type: Number,
+            value: 0 
+          },
+          statusMessage: {
+            type: String,
+            value: 'Click start to begin'
+          }
+        };
+      }
+
+      // Element class can define custom element reactions
+      // @TODO: Duplicating ready?
+      connectedCallback() {
+        super.connectedCallback();
+        // let numberOfRows = Math.ceil(fragments.length / numberOfColumns) 
+      }
+    
+      ready() {
+        super.ready();
+        // Set our countdown to the desired duration.
+        this.timeRemaining = this.duration;
+        // @TODO: Need to listen to slot for ready.
+        setTimeout(() => this._prepareForm(), 200)
+      }
+
+      _prepareForm() {
+        // Find all our input elements.
+        this.inputElements = Array.prototype.slice.call(this.querySelectorAll('[name]'));
+        this.inputElements.forEach((input) => {
+          let tangyToggleButton = document.createElement('tangy-toggle-button')
+          tangyToggleButton.setAttribute('name', input.getAttribute('name'))
+          tangyToggleButton.innerHTML = input.getAttribute('placeholder')
+          this.$.grid.appendChild(tangyToggleButton)
+        })
+
+        this.toggleButtons = Array.prototype.slice.call(this.shadowRoot.querySelectorAll('tangy-toggle-button'))
+        // Disable all the input elements. Will enable on start.
+        this.toggleButtons.forEach(element => element.disabled = true);
+
+        this.toggleButtons.forEach(element => {
+          element.addEventListener('click', (event) => {
+            if (this.lastSelectedMode === true) {
+              this.removeLastSelected();
+              // That last click will cause the opposite of what we want. Put it back to the original state.
+              event.srcElement.pressed = !event.srcElement.pressed;
+              event.srcElement.setAttribute('style', 'color:red; border: 3px solid red;'); ;
+              this.statusMessage = 'You may now proceed.';
+              //
+              // Set hidden values.
+              //
+              // Set inputs from toggle buttons.
+              this.toggleButtons.forEach((button) => {
+                this.inputElements.forEach((input) => {
+                  if (input.getAttribute('name') == button.getAttribute('name')) {
+                    input.setAttribute('value', button.getAttribute('value'))
+                  }
+                })
+              })
+              // Last selected id.
+              const lastSelectedIdInputEl = this.querySelector(`[name=${this.id}_last_selected_name`);
+              lastSelectedIdInputEl.value = event.srcElement.name;
+              // Last selected nth item.
+              const lastSelectedNthInputEl = this.querySelector(`[name=${this.id}_last_selected_nth`);
+              lastSelectedNthInputEl.value = this.inputElements.findIndex((el) => el.name === event.srcElement.name) + 1;
+              // Time remaining.
+              const timeRemainingInputEl = this.querySelector(`[name=${this.id}_time_remaining`);
+              timeRemainingInputEl.value = this.timeRemaining;
+              // Time spent.
+              const timeSpentInputEl = this.querySelector(`[name=${this.id}_time_spent`);
+              timeSpentInputEl.value = this.timeSpent;
+              // items per minute
+              const itemsPerMinuteInputEl = this.querySelector(`[name=${this.id}_items_per_minute`);
+              itemsPerMinuteInputEl.value = ( lastSelectedNthInputEl.value / ( this.timeSpent / 60 ) );
+              // Items marked is number of checkboxes checked.
+              const numberOfItemsMarkedInputEl = this.querySelector(`[name=${this.id}_number_of_items_marked`);
+              numberOfItemsMarkedInputEl.value = this.inputElements.filter((element) => {
+                return element.value !== '';
+              }).length;
+            }
+          });
+        });
+
+      }
+      clickedReset() {
+        this.removeLastSelected();
+        this.lastSelectedMode = false;
+        this.timeRemaining = this.duration;
+        this.timeSpent = 0;
+        if (this.timer.state === 'notScheduled') {
+          this.statusMessage = 'You may click start to begin again.';
+        }
+      }
+    
+      clickedStart() {
+        
+        // Prevent double starts.
+        if (this.timeSpent === 0) {
+          // @TODO Should disable start timer button to provide visual indication you can't click it again.
+          this.statusMessage = 'Timer is running.';
+          this.toggleButtons.forEach((button) => {
+            button.disabled = false
+            this.inputElements.forEach((input) => {
+              if (input.getAttribute('name') == button.getAttribute('name')) {
+                button.setAttribute('value', input.getAttribute('value'))
+              }
+            })
+          })
+          this.timer = setInterval(() => {
+            this.timeRemaining--;
+            this.timeSpent++;
+            if (this.timeRemaining === 0) {
+              clearInterval(this.timer);
+              this.timeIsUp();
+            }
+          }, 1000);
+        }
+      }
+    
+      clickedStop() {
+        clearInterval(this.timer);
+        this.statusMessage = 'Click the last item covered.';
+        this.lastSelectedMode = true;
+      }
+    
+      timeIsUp() {
+        this.lastSelectedMode = true;
+        this.statusMessage = 'Time is up, click the last item covered.';
+      }
+    
+      removeLastSelected() {
+        this.toggleButtons.forEach(cleanupElement => {
+          cleanupElement.setAttribute('style', ''); ;
+        });
+      }
+    
+    }
+
+    window.customElements.define(TangyTimed.is, TangyTimed);
+  </script>
+</dom-module>
