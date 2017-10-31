@@ -172,7 +172,7 @@
           this.toggleButtons.forEach((button) => {
             button.disabled = false
             this.inputElements.forEach((input) => {
-              if (input.getAttribute('name') == button.getAttribute('name')) {
+              if (input.getAttribute('name') == button.getAttribute('name') && input.getAttribute('value')) {
                 button.setAttribute('value', input.getAttribute('value'))
               }
             })

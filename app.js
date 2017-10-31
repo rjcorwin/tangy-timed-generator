@@ -13,7 +13,7 @@ function generateFlat(text, name, numberOfColumns) {
     i++
     let input = document.createElement('input')
     input.setAttribute('name', `${name}-${i}`)
-    input.setAttribute('value', 'on')
+    // input.setAttribute('value', '')
     input.setAttribute('type', 'hidden')
     input.setAttribute('placeholder', fragment)
     tangyTimed.appendChild(input)
