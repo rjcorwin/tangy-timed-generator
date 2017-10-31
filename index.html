@@ -1,16 +1,38 @@
 <!doctype HTML>
 <html>
+<script src="tangy-toggle-button.js"></script>
 <body>
 
+<style>
 
+tangy-toggle-button {
+width: 100%;
+}
+
+table {
+width: 100%;
+}
+td {
+width: 100%;
+}
+</style>
+
+<h2>Number of columns</h2>
+<input type="number" id="numberOfColumns" value="5"/>
 <h2>Text</h2>
-<textarea id="customText"></textarea>
+<textarea id="customText">
+A professor with close ties to the Russian government told an adviser to Donald J. Trump’s presidential campaign in April 2016 that Moscow had “dirt” on Hillary Clinton in the form of “thousands of emails,” according to court documents unsealed Monday.
+
+The adviser, George Papadopoulos, has pleaded guilty to lying to the F.B.I. about that conversation. The plea represents the most explicit evidence that the Trump campaign was aware that the Russian government was trying to help Mr. Trump and that the campaign was eager to accept that help.
+
+</textarea>
 <h2>Name</h2>
-<textarea id="customName"></textarea>
+<textarea id="customName">foo</textarea>
 <br>
 <button id="go">generate</button>
 <h2>Output</h2>
 <textarea id="output"></textarea>
+<div id="demo"></div>
 </body>
 <script src="app.js">
 </script>
