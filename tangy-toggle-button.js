@@ -32,10 +32,12 @@
       :host {
         display: inline-block;
         border: solid 3px #777;
-        color: #777;
         border-radius: 15px;
         padding: 15px;
-        margin: 30px;
+        /*
+        margin: 15px;
+        */
+        color: #777;
         font-size: 1em;
 
       }
@@ -47,7 +49,10 @@
         color: #FFF;
       }
     </style>
+    <div class="container">
     <slot></slot>
+    </div>
+
   `;
 
   // HIDE
