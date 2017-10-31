@@ -10,6 +10,7 @@
         padding: 15px;
         color: #777;
         font-size: 1em;
+        text-align: center;
 
       }
       :host([hidden]) {
@@ -19,9 +20,30 @@
         background: #777;
         color: #FFF;
       }
+      :host([highlighted]) {
+        border-color: #8BC34A;
+      }
+      .text-outer {
+        position: relative;
+        height: 100%;
+      }
+      .text-inner {
+        position: absolute;
+        top: 68%;
+        left: 50%;
+        height: 30%;
+        width: 50%;
+        margin: -15% 0 0 -25%;
+      }
+
+      .text-inner ::slotted(*) {
+        text-align: center;
+      }
     </style>
-    <div class="container">
+    <div class="text-outer">
+      <div class="text-inner">
         <slot></slot>
+      </div>
     </div>
   </template>
 
@@ -49,6 +71,16 @@
             reflectToAttribute: true,
             observer: 'onValueChange'
           },
+          disabled: {
+            type: Boolean,
+            value: false,
+            reflectToAttribute: true
+          },
+          highlighted: {
+            type: Boolean,
+            value: false,
+            reflectToAttribute: true
+          },
           pressed: {
             type: Boolean,
             value: false,
@@ -59,10 +91,11 @@
 
       connectedCallback() {
         super.connectedCallback();
-        this.addEventListener('click', this.toggle.bind(this))
+        this.addEventListener('click', this.togglePressed.bind(this))
       }
 
-      toggle() {
+      togglePressed() {
+        if (this.disabled) return
         if (this.value == '') {
           this.value = 'on'
         } else {

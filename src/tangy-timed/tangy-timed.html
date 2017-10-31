@@ -54,6 +54,11 @@
             type: Number,
             value: 0 
           },
+          // Number of columns to show items, calibrated for a Nexus 7 in landscape mode.
+          columns: {
+            type: Number,
+            value: 4
+          },
           timeSpent: {
             type: Number,
             value: 0 
@@ -81,11 +86,14 @@
       }
 
       _prepareForm() {
+        // This column mapping is calibrated for a Nexus 7 in landscape mode.
+        let columnsMap = [0, 1, 2.5, 4, 6, 8, 10, 12, 14, 16, 20]
         // Find all our input elements.
         this.inputElements = Array.prototype.slice.call(this.querySelectorAll('[name]'));
         this.inputElements.forEach((input) => {
           let tangyToggleButton = document.createElement('tangy-toggle-button')
           tangyToggleButton.setAttribute('name', input.getAttribute('name'))
+          tangyToggleButton.style.width = `calc(100% * (1/${columnsMap[this.columns]}) - 10px - 1px)`
           tangyToggleButton.innerHTML = input.getAttribute('placeholder')
           this.$.grid.appendChild(tangyToggleButton)
         })
@@ -100,11 +108,8 @@
               this.removeLastSelected();
               // That last click will cause the opposite of what we want. Put it back to the original state.
               event.srcElement.pressed = !event.srcElement.pressed;
-              event.srcElement.setAttribute('style', 'color:red; border: 3px solid red;'); ;
+              event.srcElement.setAttribute('highlighted', true); ;
               this.statusMessage = 'You may now proceed.';
-              //
-              // Set hidden values.
-              //
               // Set inputs from toggle buttons.
               this.toggleButtons.forEach((button) => {
                 this.inputElements.forEach((input) => {
@@ -186,7 +191,7 @@
     
       removeLastSelected() {
         this.toggleButtons.forEach(cleanupElement => {
-          cleanupElement.setAttribute('style', ''); ;
+          cleanupElement.removeAttribute('highlighted'); ;
         });
       }
     
