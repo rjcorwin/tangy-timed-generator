@@ -1,4 +1,5 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../src/tangy-toggle-button/tangy-toggle-button.html">
 
 <dom-module id="tangy-timed">
@@ -24,13 +25,22 @@
     <span class="countdown">[[timeRemaining]]⏱</span>
     <span> [[statusMessage]] </span>
     <div>
-      <button on-click="clickedStart">start timer</button>
-      <button on-click="clickedStop">stop timer</button>
-      <button on-click="clickedReset">reset timer</button>
+      <paper-button raised class="green"  id="enableSelectionModeButton" on-click="enableSelectionMode">start</paper-button>
+      <paper-button raised class="green"  id="stopButton" on-click="disableSelectionMode">stop</paper-button>
+      <paper-button raised class="green"  id="resetButton" on-click="reset">reset</paper-button>
+      <paper-button raised class="green"  id="enableMarkModeButton" on-click="enableMarkMode">mark mode</paper-button>
+      <paper-button raised class="green"  id="enableLastSelectedModeButton" on-click="enableLastSelectedMode">last selected mode</paper-button>
     </div>
     <div id="grid">
     </div>
     <slot></slot>
+    <div>
+      <paper-button raised class="green"  id="enableSelectionModeButton" on-click="enableSelectionMode">start</paper-button>
+      <paper-button raised class="green"  id="stopButton" on-click="disableSelectionMode">stop</paper-button>
+      <paper-button raised class="green"  id="resetButton" on-click="reset">reset</paper-button>
+      <paper-button raised class="green"  id="enableMarkModeButton" on-click="enableMarkMode">mark mode</paper-button>
+      <paper-button raised class="green"  id="enableLastSelectedModeButton" on-click="enableLastSelectedMode">last selected mode</paper-button>
+    </div>
   </template>
 
   <script>
@@ -50,7 +60,7 @@
             type: Number,
             value: 60 
           },
-          timeRemaining: {
+         emaining: {
             type: Number,
             value: 0 
           },
@@ -112,62 +122,76 @@
         // Disable all the input elements. Will enable on start.
         this.toggleButtons.forEach(element => element.disabled = true);
 
-        this.toggleButtons.forEach(element => {
-          element.addEventListener('click', (event) => {
-            if (this.lastSelectedMode === true) {
-              this.removeLastSelected();
-              // That last click will cause the opposite of what we want. Put it back to the original state.
-              event.srcElement.pressed = !event.srcElement.pressed;
-              event.srcElement.setAttribute('highlighted', true); ;
-              this.statusMessage = 'You may now proceed.';
-              // Set inputs from toggle buttons.
-              this.toggleButtons.forEach((button) => {
-                this.inputElements.forEach((input) => {
-                  if (input.getAttribute('name') == button.getAttribute('name')) {
-                    input.setAttribute('value', button.getAttribute('value'))
-                  }
-                })
-              })
-              // Last selected id.
-              const lastSelectedIdInputEl = this.querySelector(`[name=${this.id}_last_selected_name`);
-              lastSelectedIdInputEl.value = event.srcElement.name;
-              // Last selected nth item.
-              const lastSelectedNthInputEl = this.querySelector(`[name=${this.id}_last_selected_nth`);
-              lastSelectedNthInputEl.value = this.inputElements.findIndex((el) => el.name === event.srcElement.name) + 1;
-              // Time remaining.
-              const timeRemainingInputEl = this.querySelector(`[name=${this.id}_time_remaining`);
-              timeRemainingInputEl.value = this.timeRemaining;
-              // Time spent.
-              const timeSpentInputEl = this.querySelector(`[name=${this.id}_time_spent`);
-              timeSpentInputEl.value = this.timeSpent;
-              // items per minute
-              const itemsPerMinuteInputEl = this.querySelector(`[name=${this.id}_items_per_minute`);
-              itemsPerMinuteInputEl.value = ( lastSelectedNthInputEl.value / ( this.timeSpent / 60 ) );
-              // Items marked is number of checkboxes checked.
-              const numberOfItemsMarkedInputEl = this.querySelector(`[name=${this.id}_number_of_items_marked`);
-              numberOfItemsMarkedInputEl.value = this.inputElements.filter((element) => {
-                return element.value !== '';
-              }).length;
-            }
-          });
-        });
+      }
+
+      enableMarkMode() {
+        this.disableSelectionMode()
+        this.disableLastSelectedMode()
+        this.toggleButtons.forEach((button) => button.disabled = false)
+      }
+
+      disableMarkMode() {
 
       }
-      clickedReset() {
-        this.removeLastSelected();
-        this.lastSelectedMode = false;
-        this.timeRemaining = this.duration;
-        this.timeSpent = 0;
-        if (this.timer.state === 'notScheduled') {
-          this.statusMessage = 'You may click start to begin again.';
-        }
+
+      enableLastCoveredMode(element) {
+        this.disableSelectionMode()
+        this.disableMarkMode()
+        this.toggleButtons.forEach((button) => button.disabled = true)
+        this.toggleButtons.forEach(element => {
+          this.lastSelectedModeListener = element.addEventListener('click', (event) => {
+            this.toggleButtons.forEach(el => el.removeAttribute('highlighted'))
+            button = event.srcElement 
+            // That last click will cause the opposite of what we want. Put it back to the original state.
+            button.pressed = !button.pressed;
+            button.setAttribute('highlighted', true); ;
+            // Set inputs from toggle buttons.
+            this.toggleButtons.forEach((button) => {
+              this.inputElements.forEach((input) => {
+                if (input.getAttribute('name') == button.getAttribute('name')) {
+                  input.setAttribute('value', button.getAttribute('value'))
+                }
+              })
+            })
+            // Last selected id.
+            const lastSelectedIdInputEl = this.querySelector(`[name=${this.id}_last_selected_name`);
+            lastSelectedIdInputEl.value = event.srcElement.name;
+            // Last selected nth item.
+            const lastSelectedNthInputEl = this.querySelector(`[name=${this.id}_last_selected_nth`);
+            lastSelectedNthInputEl.value = this.inputElements.findIndex((el) => el.name === event.srcElement.name) + 1;
+            // Time remaining.
+            constemainingInputEl = this.querySelector(`[name=${this.id}_time_remaining`);
+           emainingInputEl.value = this.timeRemaining;
+            // Time spent.
+            const timeSpentInputEl = this.querySelector(`[name=${this.id}_time_spent`);
+            timeSpentInputEl.value = this.timeSpent;
+            // items per minute
+            const itemsPerMinuteInputEl = this.querySelector(`[name=${this.id}_items_per_minute`);
+            itemsPerMinuteInputEl.value = ( lastSelectedNthInputEl.value / ( this.timeSpent / 60 ) );
+            // Items marked is number of checkboxes checked.
+            const numberOfItemsMarkedInputEl = this.querySelector(`[name=${this.id}_number_of_items_marked`);
+            numberOfItemsMarkedInputEl.value = this.inputElements.filter((element) => {
+              return element.value !== '';
+            }).length;
+            this.statusMessage = 'You may now proceed.';
+          })
+        })
       }
-    
-      clickedStart() {
-        
+
+      disableLastMarkedMode() {
+        this.toggleButtons.forEach(el => el.removeAttribute('highlighted'))
+        // omg ugh. need to go back to creating the listener on first render and checking state. Which is fine because
+        // if this was reduxed it would be that way.
+        this.toggleButtons.forEach(element => {
+          this.lastSelectedModeListener = element.addEventListener('click', (event) => {
+          })
+        })
+      }
+          
+      enableSelectionMode() {
         // Prevent double starts.
         if (this.timeSpent === 0) {
-          // @TODO Should disable start timer button to provide visual indication you can't click it again.
+          // @TODO Should disable start button to provide visual indication you can't click it again.
           this.statusMessage = 'Timer is running.';
           this.toggleButtons.forEach((button) => {
             button.disabled = false
@@ -181,28 +205,30 @@
             this.timeRemaining--;
             this.timeSpent++;
             if (this.timeRemaining === 0) {
-              clearInterval(this.timer);
-              this.timeIsUp();
+              this.statusMessage = 'Time is up, click the last item covered.';
+              disableSelectionMode()
             }
           }, 1000);
         }
       }
-    
-      clickedStop() {
+
+      disableSelectionMode() {
         clearInterval(this.timer);
-        this.statusMessage = 'Click the last item covered.';
-        this.lastSelectedMode = true;
+        enableLastCoveredMode()
       }
-    
-      timeIsUp() {
-        this.lastSelectedMode = true;
-        this.statusMessage = 'Time is up, click the last item covered.';
+
+      reset() {
+        this.removeLastSelected();
+        this.lastSelectedMode = false;
+        this.timeRemaining = this.duration;
+        this.timeSpent = 0;
+        if (this.timer.state === 'notScheduled') {
+          this.statusMessage = 'You may click start to begin again.';
+        }
       }
     
       removeLastSelected() {
-        this.toggleButtons.forEach(cleanupElement => {
-          cleanupElement.removeAttribute('highlighted'); ;
-        });
+
       }
     
     }
